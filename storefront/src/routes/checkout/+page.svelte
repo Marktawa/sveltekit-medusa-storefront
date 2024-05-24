@@ -1,42 +1,128 @@
 <script>
-    import { onMount } from "svelte";
+  import { onMount } from 'svelte';
+  import { loadStripe } from '@stripe/stripe-js';
+  import { PUBLIC_STRIPE_KEY } from '$env/static/public';
+  import { Elements, PaymentElement, LinkAuthenticationElement, Address } from 'svelte-stripe';
+  import Medusa from '@medusajs/medusa-js';
 
-    onMount(async () => {
-        const id = localStorage.getItem("cart_id");
-        fetch(`http://localhost:9000/store/carts/${id}/payment-sessions`, {
-            method: "POST",
-            credentials: "include",
-        })
-        .then((response) => response.json())
-        .then(({ cart }) => {
-            console.log(cart.payment_sessions)
-        })
-    });
+  let stripe = null;
+  let clientSecret = null;
+  let error = null;
+  let elements;
+  let processing = false;
 
-function completeCart() {
-    const id = localStorage.getItem("cart_id");
-    fetch(`http://localhost:9000/store/carts/${id}/complete`, {
-        method: "POST",
-        dentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
+  let cartId = null;
+
+  onMount(async () => {
+    stripe = await loadStripe(PUBLIC_STRIPE_KEY);
+    const client = new Medusa();
+    cartId = localStorage.getItem("cart_id");
+
+    try {
+      const { cart } = await client.carts.createPaymentSessions(cartId);
+      const isStripeAvailable = cart.payment_sessions?.some(
+        (session) => session.provider_id === 'stripe'
+      );
+
+      if (!isStripeAvailable) return;
+
+      const { cart: updatedCart } = await client.carts.setPaymentSession(cartId, {
+        provider_id: 'stripe',
+      });
+
+      setClientSecret(updatedCart.payment_session.data.client_secret);
+    } catch (error) {
+      console.error('Error creating payment session:', error);
+    }
+  });
+
+  function setClientSecret(secret) {
+    clientSecret = secret;
+  }
+
+  async function submit() {
+    // avoid processing duplicates
+    if (processing) return
+
+    processing = true
+
+    // confirm payment with stripe
+    const result = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required'
     })
-    .then((response) => response.json())
-    .then(({ type, data }) => {
-        console.log(type, data)
-    })
+
+    // log results, for debugging
+    console.log({ result })
+
+    if (result.error) {
+      // payment failed, notify user
+      error = result.error
+      processing = false
+    } else {
+      // payment succeeded, redirect to "thank you" page
+      const client = new Medusa();
+      const response = await client.carts.complete(cartId);
+      console.log(response);
+    }
   }
 </script>
 
 <h1>Welcome to the Medusa SvelteKit Store</h1>
 <h2>Checkout</h2>
 
-<button on:click={() => { 
-        completeCart(); 
-        alert('Cart Complete');
-        }}
->
-    Complete Cart
-</button>
+{#if error}
+  <p class="error">{error.message} Please try again.</p>
+{/if}
 
+{#if clientSecret}
+  <Elements
+    {stripe}
+    {clientSecret}
+    theme="flat"
+    labels="floating"
+    variables={{ colorPrimary: '#7c4dff' }}
+    rules={{ '.Input': { border: 'solid 1px #0002' } }}
+    bind:elements
+  >
+    <form on:submit|preventDefault={submit}>
+      <LinkAuthenticationElement />
+      <PaymentElement />
+      <Address mode="billing" />
+
+      <button disabled={processing}>
+        {#if processing}
+          Processing...
+        {:else}
+          Pay
+        {/if}
+      </button>
+    </form>
+  </Elements>
+{:else}
+  Loading...
+{/if}
+
+<style>
+  .error {
+    color: tomato;
+    margin: 2rem 0 0;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 2rem 0;
+  }
+
+  button {
+    padding: 1rem;
+    border-radius: 5px;
+    border: solid 1px #ccc;
+    color: white;
+    background: #7c4dff;
+    font-size: 1.2rem;
+    margin: 1rem 0;
+  }
+</style>

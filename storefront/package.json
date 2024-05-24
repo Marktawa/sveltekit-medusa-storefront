@@ -14,5 +14,11 @@
 		"svelte": "^4.2.7",
 		"vite": "^5.0.3"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@medusajs/medusa-js": "^6.1.8",
+		"@stripe/stripe-js": "^3.4.1",
+		"stripe": "^15.7.0",
+		"svelte-stripe": "^1.2.0"
+	}
 }
