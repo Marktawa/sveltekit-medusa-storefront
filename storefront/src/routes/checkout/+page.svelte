@@ -1,4 +1,5 @@
 <script>
+  import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { loadStripe } from '@stripe/stripe-js';
   import { PUBLIC_STRIPE_KEY } from '$env/static/public';
@@ -64,6 +65,7 @@
       const client = new Medusa();
       const response = await client.carts.complete(cartId);
       console.log(response);
+      goto('../thanks')
     }
   }
 </script>
