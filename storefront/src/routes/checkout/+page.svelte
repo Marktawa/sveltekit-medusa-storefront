@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import { loadStripe } from '@stripe/stripe-js';
   import { PUBLIC_STRIPE_KEY } from '$env/static/public';
-  import { Elements, PaymentElement, LinkAuthenticationElement, Address } from 'svelte-stripe';
+  import { Elements, PaymentElement } from 'svelte-stripe';
   import Medusa from '@medusajs/medusa-js';
 
   let stripe = null;
@@ -70,7 +70,6 @@
   }
 </script>
 
-<h1>Welcome to the Medusa SvelteKit Store</h1>
 <h2>Checkout</h2>
 
 {#if error}
@@ -81,16 +80,12 @@
   <Elements
     {stripe}
     {clientSecret}
-    theme="flat"
-    labels="floating"
-    variables={{ colorPrimary: '#7c4dff' }}
-    rules={{ '.Input': { border: 'solid 1px #0002' } }}
+    variables={{ colorPrimary: '#000' }}
+    rules={{ '.Input': { border: 'solid 1px #000' } }}
     bind:elements
   >
     <form on:submit|preventDefault={submit}>
-      <LinkAuthenticationElement />
       <PaymentElement />
-      <Address mode="billing" />
 
       <button disabled={processing}>
         {#if processing}
@@ -106,25 +101,37 @@
 {/if}
 
 <style>
+  h2 {
+    padding: 4rem 0 2rem 0;
+    text-align: center;
+    font-size: 3rem;
+  }
+
   .error {
     color: tomato;
     margin: 2rem 0 0;
   }
 
   form {
+    max-width: 24rem;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin: 2rem 0;
+    gap: 0.5rem;
+    margin: 0 auto;
   }
 
   button {
-    padding: 1rem;
-    border-radius: 5px;
-    border: solid 1px #ccc;
-    color: white;
-    background: #7c4dff;
-    font-size: 1.2rem;
+    padding: 0.5rem 0;
+    border: solid 1px #000;
+    color: #FFF;
+    background: #000;
+    font-size: 1rem;
     margin: 1rem 0;
+    font-family: inherit;
+  }
+
+  button:hover {
+    font-weight: 600;
+    cursor: pointer;
   }
 </style>
