@@ -8,7 +8,7 @@
 
     onMount(async () => {
         const id = localStorage.getItem("cart_id");
-        const res = await fetch(`http://localhost:9000/store/carts/${id}`, {
+        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${id}`, {
             credentials: "include",
         });
         data = await res.json();
@@ -18,7 +18,7 @@
 
     function addCustomer() {
         const id = localStorage.getItem("cart_id");
-        fetch(`http://localhost:9000/store/carts/${id}`, {
+        fetch(`${MEDUSA_BACKEND_URL}/store/carts/${id}`, {
             method: "POST",
             credentials: "include",
             headers: {

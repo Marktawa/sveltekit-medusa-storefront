@@ -1,11 +1,13 @@
 <script>
+  import { MEDUSA_BACKEND_URL } from '$env/static/public';
+
   /** @type {import('./$types').PageData} */
   export let data;
 
   import { onMount } from "svelte";
 
   onMount(async () => {
-    fetch(`http://localhost:9000/store/carts`, {
+    fetch(`${MEDUSA_BACKEND_URL}/store/carts`, {
       method: "POST",
       credentials: "include",
     })
@@ -18,7 +20,7 @@
 
   function addProductToCart(variant_id) {
     const id = localStorage.getItem("cart_id");
-    fetch(`http://localhost:9000/store/carts/${id}/line-items`, {
+    fetch(`${MEDUSA_BACKEND_URL}/store/carts/${id}/line-items`, {
       method: "POST",
       dentials: "include",
       headers: {
