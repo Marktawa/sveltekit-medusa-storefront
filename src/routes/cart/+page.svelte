@@ -1,5 +1,6 @@
 <script>
     import { onMount } from "svelte";
+    import { PUBLIC_MEDUSA_BACKEND_URL } from '$env/static/public';
 
     let data;
     let email;
@@ -8,7 +9,7 @@
 
     onMount(async () => {
         const id = localStorage.getItem("cart_id");
-        const res = await fetch(`${MEDUSA_BACKEND_URL}/store/carts/${id}`, {
+        const res = await fetch(`${PUBLIC_MEDUSA_BACKEND_URL}/store/carts/${id}`, {
             credentials: "include",
         });
         data = await res.json();
@@ -18,7 +19,7 @@
 
     function addCustomer() {
         const id = localStorage.getItem("cart_id");
-        fetch(`${MEDUSA_BACKEND_URL}/store/carts/${id}`, {
+        fetch(`${PUBLIC_MEDUSA_BACKEND_URL}/store/carts/${id}`, {
             method: "POST",
             credentials: "include",
             headers: {
