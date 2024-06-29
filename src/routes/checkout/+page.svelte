@@ -63,7 +63,7 @@
       processing = false
     } else {
       // payment succeeded, redirect to "thank you" page
-      const client = new Medusa();
+      const client = new Medusa({ baseUrl: PUBLIC_MEDUSA_BACKEND_URL, maxRetries: 3 });
       const response = await client.carts.complete(cartId);
       console.log(response);
       goto('../thanks')
