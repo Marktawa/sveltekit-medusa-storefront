@@ -3,6 +3,7 @@
   import { onMount } from 'svelte';
   import { loadStripe } from '@stripe/stripe-js';
   import { PUBLIC_STRIPE_KEY } from '$env/static/public';
+  import { PUBLIC_MEDUSA_BACKEND_URL } from '$env/static/public';
   import { Elements, PaymentElement } from 'svelte-stripe';
   import Medusa from '@medusajs/medusa-js';
 
@@ -16,7 +17,7 @@
 
   onMount(async () => {
     stripe = await loadStripe(PUBLIC_STRIPE_KEY);
-    const client = new Medusa();
+    const client = new Medusa({ baseUrl: PUBLIC_MEDUSA_BACKEND_URL, maxRetries: 3 });
     cartId = localStorage.getItem("cart_id");
 
     try {
